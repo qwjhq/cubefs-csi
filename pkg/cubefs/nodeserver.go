@@ -17,6 +17,7 @@ limitations under the License.
 package cubefs
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"os"
 	"os/exec"
@@ -469,7 +470,17 @@ func (ns *nodeServer) remountDamagedVolumes(nodeName string) {
 			defer wg.Done()
 			// need retry mount if error
 			glog.V(5).Infof("remountDamagedVolumes begin do volume mount %s", p.Name)
-			globalMountPath := filepath.Join(ns.KubeletRootDir, fmt.Sprintf("/plugins/kubernetes.io/csi/pv/%s/globalmount", p.Name))
+			var globalMountPath string
+			if ns.GlobalVersion == "new" {
+				// k8s verion >= v1.24
+				result := sha256.Sum256([]byte(pvp.Name))
+				volSha := fmt.Sprintf("%x", result)
+				globalMountPath = filepath.Join(ns.KubeletRootDir, fmt.Sprintf("/plugins/kubernetes.io/csi/csi.cubefs.com/%s/globalmount", volSha))
+			} else {
+				//  k8s <= v1.23
+				globalMountPath = filepath.Join(ns.KubeletRootDir, fmt.Sprintf("/plugins/kubernetes.io/csi/pv/%s/globalmount", p.Name))
+			}
+
 			var err error
 			for i := 0; i < 5; i++ {
 				// some times mount return success, actually is broken mount point, retry 5 time

@@ -48,6 +48,7 @@ type Config struct {
 	Version        string
 	RemountDamaged bool
 	KubeletRootDir string
+	GlobalVersion  string
 }
 
 func NewDriver(conf Config) (*driver, error) {
