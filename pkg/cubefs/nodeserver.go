@@ -46,6 +46,8 @@ type nodeServer struct {
 	mutex   sync.RWMutex
 }
 
+var mutex sync.Mutex
+
 func (ns *nodeServer) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolumeRequest) (*csi.NodePublishVolumeResponse, error) {
 	ns.mutex.Lock()
 	defer ns.mutex.Unlock()
@@ -152,7 +154,8 @@ func (ns *nodeServer) NodeStageVolume(ctx context.Context, req *csi.NodeStageVol
 }
 
 func (ns *nodeServer) mount(targetPath, volumeName string, param map[string]string) (err error) {
-
+	mutex.Lock()
+	defer mutex.Unlock()
 	// check mountPoint
 	isMnt, err := IsMountPoint(targetPath)
 	glog.V(5).Infof("mount targetPath %s isMnt %v err %v", targetPath, isMnt, err)
