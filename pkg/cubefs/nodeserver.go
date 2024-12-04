@@ -46,8 +46,6 @@ type nodeServer struct {
 	mutex   sync.RWMutex
 }
 
-var mutex sync.Mutex
-
 func (ns *nodeServer) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolumeRequest) (*csi.NodePublishVolumeResponse, error) {
 	ns.mutex.Lock()
 	defer ns.mutex.Unlock()
@@ -154,11 +152,9 @@ func (ns *nodeServer) NodeStageVolume(ctx context.Context, req *csi.NodeStageVol
 }
 
 func (ns *nodeServer) mount(targetPath, volumeName string, param map[string]string) (err error) {
-	mutex.Lock()
-	defer mutex.Unlock()
 	// check mountPoint
 	isMnt, err := IsMountPoint(targetPath)
-	glog.V(5).Infof("mount targetPath %s isMnt %v err %v", targetPath, isMnt, err)
+	glog.V(5).Infof("mount targetPath %s volumeName %s isMnt %v err %v", targetPath, volumeName, isMnt, err)
 	if err != nil {
 		if strings.Contains(err.Error(), "transport endpoint is not connected") {
 			if err = ns.mounter.Unmount(targetPath); err != nil {
@@ -510,6 +506,7 @@ func (ns *nodeServer) dealPodVolumeMount(p *persistentVolumeWithPods, globalMoun
 		glog.Warningf("dealPodVolumeMount Unmount globalMountPath %s err %v", globalMountPath, err)
 	}
 
+	time.Sleep(2 * time.Second)
 	if err := ns.mount(globalMountPath, p.Name, p.Spec.CSI.VolumeAttributes); err != nil {
 		return status.Errorf(codes.Internal, "dealPodVolumeMount globalMount mount volume %q to path %q failed: %v", p.Name, globalMountPath, err)
 	}
