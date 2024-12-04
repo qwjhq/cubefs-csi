@@ -473,7 +473,7 @@ func (ns *nodeServer) remountDamagedVolumes(nodeName string) {
 			var globalMountPath string
 			if ns.GlobalVersion == "new" {
 				// k8s verion >= v1.24
-				result := sha256.Sum256([]byte(pvp.Name))
+				result := sha256.Sum256([]byte(p.Name))
 				volSha := fmt.Sprintf("%x", result)
 				globalMountPath = filepath.Join(ns.KubeletRootDir, fmt.Sprintf("/plugins/kubernetes.io/csi/csi.cubefs.com/%s/globalmount", volSha))
 			} else {
