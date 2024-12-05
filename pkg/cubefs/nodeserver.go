@@ -187,15 +187,17 @@ func (ns *nodeServer) mount(targetPath, volumeName string, param map[string]stri
 		return status.Errorf(codes.InvalidArgument, "mount new cfs server failed: %v", err)
 	}
 
+	glog.V(5).Infof("mount targetPath %s volumeName %s cfsServer clientConf %v", targetPath, volumeName, cfsServer.clientConf)
 	if err = cfsServer.persistClientConf(targetPath); err != nil {
 		return status.Errorf(codes.Internal, "mount persist client config file failed: %v", err)
 
 	}
 
+	glog.V(5).Infof("mount targetPath %s volumeName %s cfsServer clientConf %v run", targetPath, volumeName, cfsServer.clientConf)
 	if err = cfsServer.runClient(); err != nil {
 		return status.Errorf(codes.Internal, "mount failed: %v", err)
 	}
-
+	glog.V(5).Infof("mount targetPath %s volumeName %s cfsServer clientConf %v run success", targetPath, volumeName, cfsServer.clientConf)
 	return
 }
 
