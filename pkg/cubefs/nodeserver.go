@@ -181,6 +181,8 @@ func (ns *nodeServer) mount(targetPath, volumeName string, param map[string]stri
 		return nil
 	}
 
+	ns.mutex.Lock()
+	defer ns.mutex.Unlock()
 	// create cfs conn and mount cfs volume
 	cfsServer, err := newCfsServer(volumeName, param)
 	if err != nil {
