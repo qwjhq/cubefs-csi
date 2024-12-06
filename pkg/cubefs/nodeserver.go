@@ -463,9 +463,10 @@ func (ns *nodeServer) remountDamagedVolumes(nodeName string) {
 	}
 
 	if len(pvWithPods) == 0 {
+		glog.Infof("get getAttachedPVWithPodsOnNode pvWithPods is null")
 		return
 	}
-
+	glog.Infof("enter remountDamagedVolumes deal pod mount cubefs volume")
 	var wg sync.WaitGroup
 	wg.Add(len(pvWithPods))
 	for _, pvp := range pvWithPods {
