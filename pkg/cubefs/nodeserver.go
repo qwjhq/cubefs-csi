@@ -161,6 +161,7 @@ func (ns *nodeServer) mount(targetPath, volumeName string, param map[string]stri
 				if strings.Contains(err.Error(), "not mounted") {
 					glog.Warningf("mount corrupt mount Unmount targetPath %s unmounted", targetPath)
 				} else {
+					glog.Errorf("mount corrupt mount Unmount targetPath %s volumeName %s failed %v", targetPath, volumeName, err)
 					return status.Errorf(codes.Internal, "mount corrupt mount Unmount targetPath %s failed %v", targetPath, err)
 				}
 			}
@@ -168,9 +169,11 @@ func (ns *nodeServer) mount(targetPath, volumeName string, param map[string]stri
 		} else if os.IsNotExist(err) {
 			// os.IsNotExist(err)  not exist
 			if err = createMountPoint(targetPath); err != nil {
+				glog.Errorf("mount createMountPoint targetPath %s volumeName %s failed %v", targetPath, volumeName, err)
 				return status.Errorf(codes.Internal, "mount createMountPoint failed error: %v", err)
 			}
 		} else {
+			glog.Errorf("mount IsMountPoint targetPath %s volumeName %s failed %v", targetPath, volumeName, err)
 			return status.Errorf(codes.Internal, "mount IsMountPoint failed error: %v", err)
 		}
 	}
@@ -184,17 +187,20 @@ func (ns *nodeServer) mount(targetPath, volumeName string, param map[string]stri
 	// create cfs conn and mount cfs volume
 	cfsServer, err := newCfsServer(volumeName, param)
 	if err != nil {
+		glog.Errorf("mount newCfsServer targetPath %s volumeName %s failed %v", targetPath, volumeName, err)
 		return status.Errorf(codes.InvalidArgument, "mount new cfs server failed: %v", err)
 	}
 
 	glog.V(5).Infof("mount targetPath %s volumeName %s cfsServer clientConf %v", targetPath, volumeName, cfsServer.clientConf)
 	if err = cfsServer.persistClientConf(targetPath); err != nil {
+		glog.Errorf("mount persistClientConf targetPath %s volumeName %s failed %v", targetPath, volumeName, err)
 		return status.Errorf(codes.Internal, "mount persist client config file failed: %v", err)
 
 	}
 
 	glog.V(5).Infof("mount targetPath %s volumeName %s cfsServer clientConf %v run", targetPath, volumeName, cfsServer.clientConf)
 	if err = cfsServer.runClient(); err != nil {
+		glog.Errorf("mount runClient targetPath %s volumeName %s failed %v", targetPath, volumeName, err)
 		return status.Errorf(codes.Internal, "mount failed: %v", err)
 	}
 	glog.V(5).Infof("mount targetPath %s volumeName %s cfsServer clientConf %v run success", targetPath, volumeName, cfsServer.clientConf)
