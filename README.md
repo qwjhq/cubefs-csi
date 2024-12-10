@@ -229,3 +229,10 @@ The field `claimName` refers to the PVC created before.
 ```
 $ kubectl create -f examples/deployment.yaml
 ```
+
+# build 
+```
+docker run -it -v $(pwd):/go/src/github.com/cubefs/cubefs-csi --platform linux/amd64 golang:1.18.10 
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -gcflags=-trimpath=$(pwd) -asmflags=-trimpath=$(pwd) -o build/bin/cfs-csi-driver ./cmd/
+docker build --platform linux/amd64 -t cubefs/cfs-csi-driver:v3.3.2 ./build
+```
